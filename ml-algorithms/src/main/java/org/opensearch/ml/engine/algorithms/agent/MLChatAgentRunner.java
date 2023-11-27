@@ -8,6 +8,8 @@ package org.opensearch.ml.engine.algorithms.agent;
 import static org.opensearch.ml.common.conversation.ActionConstants.ADDITIONAL_INFO_FIELD;
 import static org.opensearch.ml.common.conversation.ActionConstants.AI_RESPONSE_FIELD;
 import static org.opensearch.ml.common.utils.StringUtils.gson;
+import static org.opensearch.ml.engine.algorithms.agent.prompt.PromptHelper.getFormatInstructions;
+import static org.opensearch.ml.engine.algorithms.agent.prompt.PromptHelper.getHumanMessage;
 
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
@@ -24,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringSubstitutor;
 import org.opensearch.action.ActionRequest;
@@ -51,9 +54,15 @@ import org.opensearch.ml.common.spi.tools.Tool;
 import org.opensearch.ml.common.transport.MLTaskResponse;
 import org.opensearch.ml.common.transport.prediction.MLPredictionTaskAction;
 import org.opensearch.ml.common.transport.prediction.MLPredictionTaskRequest;
+import org.opensearch.ml.engine.algorithms.agent.prompt.ChatCreatePromptArgs;
+import org.opensearch.ml.engine.algorithms.agent.prompt.MessagesPlaceholder;
+import org.opensearch.ml.engine.algorithms.agent.prompt.Prompt;
+import org.opensearch.ml.engine.algorithms.agent.prompt.template.HumanMessagePromptTemplate;
+import org.opensearch.ml.engine.algorithms.agent.prompt.template.SystemMessagePromptTemplate;
 import org.opensearch.ml.engine.memory.ConversationIndexMemory;
 import org.opensearch.ml.engine.memory.ConversationIndexMessage;
 import org.opensearch.ml.engine.tools.MLModelTool;
+import org.opensearch.ml.repackage.com.google.common.collect.ImmutableList;
 import org.opensearch.ml.repackage.com.google.common.collect.ImmutableMap;
 import org.opensearch.ml.repackage.com.google.common.collect.Lists;
 
@@ -829,6 +838,22 @@ public class MLChatAgentRunner implements MLAgentRunner {
             return substitutor.replace(prompt);
         }
         return prompt;
+    }
+
+    public static void createPrompt(Map<String, Tool> tools, Map<String, MLToolSpec> toolSpecMap, ChatCreatePromptArgs args) {
+        String systemMessageTemplate = (args.getSystemMessageTemplate() != null ? args.getSystemMessageTemplate() : Prompt.DEFAULT_PREFIX) + Prompt.PREFIX_END;
+        String humanMessageTemplate = args.getHumanMessageTemplate() != null ? args.getHumanMessageTemplate() : Prompt.DEFAULT_SUFFIX;
+        String toolStrings = tools
+                .entrySet()
+                .stream()
+                .map(e -> new StringBuilder().append(e.getValue().getName()).append(": ").append(e.getValue().getDescription()).toString())
+                .collect(Collectors.joining("\n"));
+        String toolNames = tools.entrySet().stream().map(e -> e.getValue().getName()).collect(Collectors.joining(", "));
+        String formatInstructionsTemplate = args.getFormatInstructionsTemplate() != null ? args.getFormatInstructionsTemplate() : Prompt.FORMAT_INSTRUCTIONS;
+        String formatInstructions = getFormatInstructions(formatInstructionsTemplate, toolNames);
+        String humanMessage = getHumanMessage(humanMessageTemplate, toolStrings, formatInstructions);
+        List<String> inputVariables = args.getInputVariables() != null ? args.getInputVariables() : ImmutableList.of("input", "chat_history", "agent_scratchpad");
+        List<?> messsages = ImmutableList.of(SystemMessagePromptTemplate.fromTemplate(systemMessageTemplate), new MessagesPlaceholder("chat_history"), HumanMessagePromptTemplate.fromTemplate(humanMessage), new MessagesPlaceholder("agent_scratchpad"));
     }
 
 }
