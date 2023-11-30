@@ -5,11 +5,11 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.template;
 
-import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
 
 public class ChatPromptTemplate extends BaseChatPromptTemplate {
     private List<?> messages;

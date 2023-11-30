@@ -5,10 +5,10 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.message;
 
+import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.io.Serializable;
 
 @Data
 @AllArgsConstructor

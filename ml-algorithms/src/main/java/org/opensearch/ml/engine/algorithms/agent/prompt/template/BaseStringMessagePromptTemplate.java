@@ -5,13 +5,14 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.template;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.util.List;
+import java.util.Map;
+
 import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
 import org.opensearch.ml.repackage.com.google.common.collect.ImmutableList;
 
-import java.util.List;
-import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 
 public abstract class BaseStringMessagePromptTemplate extends BaseMessagePromptTemplate {
     @Getter

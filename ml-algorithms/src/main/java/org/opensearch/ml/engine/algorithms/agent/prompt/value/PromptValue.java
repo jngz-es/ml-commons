@@ -5,10 +5,10 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.value;
 
-import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
-
 import java.io.Serializable;
 import java.util.List;
+
+import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
 
 public abstract class PromptValue implements Serializable {
     private static final long serialVersionUID = 1L;

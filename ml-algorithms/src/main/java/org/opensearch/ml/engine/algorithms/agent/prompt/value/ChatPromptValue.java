@@ -5,12 +5,13 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.value;
 
-import lombok.AllArgsConstructor;
-import lombok.Setter;
+import java.util.List;
+
 import org.opensearch.ml.engine.algorithms.agent.prompt.PromptHelper;
 import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
 public class ChatPromptValue extends PromptValue {

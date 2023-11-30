@@ -5,12 +5,13 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.value;
 
-import lombok.AllArgsConstructor;
+import java.util.List;
+
 import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
 import org.opensearch.ml.engine.algorithms.agent.prompt.message.HumanMessage;
 import org.opensearch.ml.repackage.com.google.common.collect.ImmutableList;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class StringPromptValue extends PromptValue {

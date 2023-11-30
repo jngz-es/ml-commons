@@ -5,14 +5,15 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt;
 
-import lombok.AllArgsConstructor;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
 import org.opensearch.ml.engine.algorithms.agent.prompt.template.BaseMessagePromptTemplate;
 import org.opensearch.ml.repackage.com.google.common.collect.ImmutableList;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class MessagesPlaceholder extends BaseMessagePromptTemplate {
@@ -25,7 +26,11 @@ public class MessagesPlaceholder extends BaseMessagePromptTemplate {
             return null;
         }
 
-        List<BaseMessage> res = ((List<?>) value).stream().filter(o -> o instanceof BaseMessage).map(o -> (BaseMessage) o).collect(Collectors.toList());
+        List<BaseMessage> res = ((List<?>) value)
+            .stream()
+            .filter(o -> o instanceof BaseMessage)
+            .map(o -> (BaseMessage) o)
+            .collect(Collectors.toList());
         return res;
     }
 

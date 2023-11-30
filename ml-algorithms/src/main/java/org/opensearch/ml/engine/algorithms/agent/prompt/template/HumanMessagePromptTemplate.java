@@ -5,10 +5,10 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.template;
 
+import java.util.Map;
+
 import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
 import org.opensearch.ml.engine.algorithms.agent.prompt.message.HumanMessage;
-
-import java.util.Map;
 
 public class HumanMessagePromptTemplate extends BaseStringMessagePromptTemplate {
     public HumanMessagePromptTemplate(StringPromptTemplate template) {

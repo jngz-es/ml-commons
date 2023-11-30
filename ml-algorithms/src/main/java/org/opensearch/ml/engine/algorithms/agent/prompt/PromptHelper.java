@@ -5,22 +5,20 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt;
 
-import org.apache.commons.text.StringSubstitutor;
-import org.opensearch.ml.common.agent.MLToolSpec;
-import org.opensearch.ml.common.spi.tools.Tool;
-import org.opensearch.ml.engine.algorithms.agent.prompt.message.AIMessage;
-import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
-import org.opensearch.ml.engine.algorithms.agent.prompt.message.HumanMessage;
-import org.opensearch.ml.engine.algorithms.agent.prompt.message.SystemMessage;
-import org.opensearch.ml.repackage.com.google.common.collect.ImmutableList;
-import org.opensearch.ml.repackage.com.google.common.collect.ImmutableMap;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import org.apache.commons.text.StringSubstitutor;
+import org.jetbrains.annotations.NotNull;
+import org.opensearch.ml.engine.algorithms.agent.prompt.message.AIMessage;
+import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
+import org.opensearch.ml.engine.algorithms.agent.prompt.message.HumanMessage;
+import org.opensearch.ml.engine.algorithms.agent.prompt.message.SystemMessage;
+import org.opensearch.ml.repackage.com.google.common.collect.ImmutableMap;
 
 public class PromptHelper {
     public static String getBufferString(List<BaseMessage> messages, String humanPrefix, String aiPrefix) {
@@ -51,7 +49,8 @@ public class PromptHelper {
         return new StringSubstitutor(kwargs, "{", "}").replace(template);
     }
 
-    //Only single pair of curly braces in template.
+    // Only single pair of curly braces in template.
+    @NotNull
     public static List<String> getVariables(String template) {
         List<String> res = new ArrayList<>();
         String regex = "\\{(.*?)\\}";

@@ -5,12 +5,13 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.template;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import org.opensearch.ml.engine.algorithms.agent.prompt.value.PromptValue;
-
 import java.util.List;
 import java.util.Map;
+
+import org.opensearch.ml.engine.algorithms.agent.prompt.value.PromptValue;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @Data
 @AllArgsConstructor

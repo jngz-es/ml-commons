@@ -5,11 +5,11 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.template;
 
-import org.opensearch.ml.engine.algorithms.agent.prompt.value.PromptValue;
-import org.opensearch.ml.engine.algorithms.agent.prompt.value.StringPromptValue;
-
 import java.util.List;
 import java.util.Map;
+
+import org.opensearch.ml.engine.algorithms.agent.prompt.value.PromptValue;
+import org.opensearch.ml.engine.algorithms.agent.prompt.value.StringPromptValue;
 
 public abstract class StringPromptTemplate extends BasePromptTemplate {
     public StringPromptTemplate(List<String> inputVariables) {

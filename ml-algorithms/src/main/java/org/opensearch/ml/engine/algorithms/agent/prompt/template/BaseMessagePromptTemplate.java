@@ -5,11 +5,11 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.template;
 
-import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+
+import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
 
 public abstract class BaseMessagePromptTemplate implements Serializable {
     private static final long serialVersionUID = 1L;

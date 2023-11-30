@@ -5,10 +5,10 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.template;
 
+import java.util.Map;
+
 import org.opensearch.ml.engine.algorithms.agent.prompt.message.AIMessage;
 import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
-
-import java.util.Map;
 
 public class AIMessagePromptTemplate extends BaseStringMessagePromptTemplate {
     public AIMessagePromptTemplate(StringPromptTemplate template) {

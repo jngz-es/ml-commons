@@ -5,12 +5,13 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.template;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.opensearch.ml.engine.algorithms.agent.prompt.PromptHelper;
-
 import java.util.List;
 import java.util.Map;
+
+import org.opensearch.ml.engine.algorithms.agent.prompt.PromptHelper;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public class PromptTemplate extends StringPromptTemplate {
     @Getter

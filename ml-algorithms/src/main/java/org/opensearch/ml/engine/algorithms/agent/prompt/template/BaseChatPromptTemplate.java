@@ -5,12 +5,12 @@
 
 package org.opensearch.ml.engine.algorithms.agent.prompt.template;
 
-import org.opensearch.ml.engine.algorithms.agent.prompt.value.ChatPromptValue;
-import org.opensearch.ml.engine.algorithms.agent.prompt.value.PromptValue;
-import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
-
 import java.util.List;
 import java.util.Map;
+
+import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
+import org.opensearch.ml.engine.algorithms.agent.prompt.value.ChatPromptValue;
+import org.opensearch.ml.engine.algorithms.agent.prompt.value.PromptValue;
 
 public abstract class BaseChatPromptTemplate extends BasePromptTemplate {
     public BaseChatPromptTemplate(List<String> inputVariables) {
