@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringSubstitutor;
-import org.jetbrains.annotations.NotNull;
 import org.opensearch.ml.engine.algorithms.agent.prompt.message.AIMessage;
 import org.opensearch.ml.engine.algorithms.agent.prompt.message.BaseMessage;
 import org.opensearch.ml.engine.algorithms.agent.prompt.message.HumanMessage;
@@ -50,7 +49,6 @@ public class PromptHelper {
     }
 
     // Only single pair of curly braces in template.
-    @NotNull
     public static List<String> getVariables(String template) {
         List<String> res = new ArrayList<>();
         String regex = "\\{(.*?)\\}";
