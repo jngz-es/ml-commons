@@ -73,7 +73,7 @@ import static org.opensearch.ml.engine.algorithms.agent.prompt.PromptHelper.getH
 @Log4j2
 @Data
 @NoArgsConstructor
-public class MLConvChatAgentRunner {
+public class MLConvChatAgentRunner implements MLAgentRunner {
 
     public static final String SESSION_ID = "session_id";
     public static final String PROMPT_PREFIX = "prompt_prefix";
@@ -254,7 +254,7 @@ public class MLConvChatAgentRunner {
             : PromptTemplate.PROMPT_TEMPLATE_SUFFIX;
         tmpParameters.put("prompt.suffix", promptSuffix);
 
-        String promptFormatInstruction = parameters.containsKey("prompt.format_instructions")
+        String promptFormatInstruction = parameters.containsKey("prompt.format_instruction")
             ? parameters.get("prompt.format_instruction")
             : PromptTemplate.PROMPT_FORMAT_INSTRUCTION;
         tmpParameters.put("prompt.format_instruction", promptFormatInstruction);
@@ -284,9 +284,6 @@ public class MLConvChatAgentRunner {
 
         tmpParameters.put(PROMPT, prompt);
 
-        ChatCreatePromptArgs promptArgs = new ChatCreatePromptArgs(tmpParameters.get("prompt.prefix"), tmpParameters.get("prompt.suffix"), tmpParameters.get("prompt.format_instructions"), null);
-        ChatPromptTemplate chatPromptTemplate = createPrompt(tools, toolSpecMap, promptArgs);
-
         List<ModelTensors> modelTensors = new ArrayList<>();
 
         List<ModelTensors> cotModelTensors = new ArrayList<>();
@@ -294,7 +291,13 @@ public class MLConvChatAgentRunner {
             .add(
                 ModelTensors
                     .builder()
-                    .mlModelTensors(Arrays.asList(ModelTensor.builder().name(MLAgentExecutor.MEMORY_ID).result(sessionId).build()))
+                    .mlModelTensors(
+                        Arrays
+                            .asList(
+                                ModelTensor.builder().name(MLAgentExecutor.MEMORY_ID).result(sessionId).build(),
+                                ModelTensor.builder().name(MLAgentExecutor.PARENT_INTERACTION_ID).result(parentInteractionId).build()
+                            )
+                    )
                     .build()
             );
 

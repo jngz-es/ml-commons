@@ -859,7 +859,7 @@ public class MLChatAgentRunner implements MLAgentRunner {
         List<String> inputVariables = args.getInputVariables() != null
             ? args.getInputVariables()
             : ImmutableList.of("input", "chat_history", "agent_scratchpad");
-        List<?> messsages = ImmutableList
+        List<?> messages = ImmutableList
             .of(
                 SystemMessagePromptTemplate.fromTemplate(systemMessageTemplate),
                 new MessagesPlaceholder("chat_history"),
@@ -867,7 +867,7 @@ public class MLChatAgentRunner implements MLAgentRunner {
                 new MessagesPlaceholder("agent_scratchpad")
             );
 
-        return new ChatPromptTemplate(inputVariables, messsages);
+        return new ChatPromptTemplate(inputVariables, messages);
     }
 
 }
