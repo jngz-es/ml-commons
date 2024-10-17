@@ -87,6 +87,7 @@ public class EncryptorImpl implements Encryptor {
 
     @Override
     public String decrypt(String encryptedText) {
+        log.error("[decrypt begin] the key is {}", masterKey);
         initMasterKey();
         final AwsCrypto crypto = AwsCrypto.builder().withCommitmentPolicy(CommitmentPolicy.RequireEncryptRequireDecrypt).build();
 
@@ -108,6 +109,7 @@ public class EncryptorImpl implements Encryptor {
 
     private void initMasterKey() {
         if (masterKey != null) {
+            log.error("[initMasterKey 0] the key is {}", masterKey);
             return;
         }
         AtomicReference<Exception> exceptionRef = new AtomicReference<>();
@@ -130,6 +132,7 @@ public class EncryptorImpl implements Encryptor {
                             indexRequest.opType(DocWriteRequest.OpType.CREATE);
                             client.index(indexRequest, ActionListener.wrap(indexResponse -> {
                                 this.masterKey = generatedMasterKey;
+                                log.error("[initMasterKey 1] the key is {}", masterKey);
                                 log.info("ML encryption master key initialized successfully");
                                 latch.countDown();
                             }, e -> {
@@ -143,6 +146,7 @@ public class EncryptorImpl implements Encryptor {
                                             if (getMasterKeyResponse != null && getMasterKeyResponse.isExists()) {
                                                 final String masterKey = (String) getMasterKeyResponse.getSourceAsMap().get(MASTER_KEY);
                                                 this.masterKey = masterKey;
+                                                log.error("[initMasterKey 2] the key is {}", masterKey);
                                                 log.info("ML encryption master key already initialized, no action needed");
                                                 latch.countDown();
                                             } else {
@@ -164,7 +168,8 @@ public class EncryptorImpl implements Encryptor {
                         } else {
                             final String masterKey = (String) getResponse.getSourceAsMap().get(MASTER_KEY);
                             this.masterKey = masterKey;
-                            log.info("ML encryption master key already initialized, no action needed");
+                            log.error("[initMasterKey 3] the key is {}", masterKey);
+                            log.info("ML encryption master key already initialized, no action needed 1");
                             latch.countDown();
                         }
                     }, e -> {
@@ -187,7 +192,7 @@ public class EncryptorImpl implements Encryptor {
         }
 
         if (exceptionRef.get() != null) {
-            log.debug("Failed to init master key", exceptionRef.get());
+            log.error("Failed to init master key", exceptionRef.get());
             if (exceptionRef.get() instanceof RuntimeException) {
                 throw (RuntimeException) exceptionRef.get();
             } else {
@@ -197,6 +202,7 @@ public class EncryptorImpl implements Encryptor {
         if (masterKey == null) {
             throw new ResourceNotFoundException(MASTER_KEY_NOT_READY_ERROR);
         }
+        log.error("[initMasterKey 4] the key is {}", masterKey);
     }
 
 }
