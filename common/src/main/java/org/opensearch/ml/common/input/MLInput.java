@@ -26,11 +26,13 @@ import org.opensearch.ml.common.dataframe.DefaultDataFrame;
 import org.opensearch.ml.common.dataset.DataFrameInputDataset;
 import org.opensearch.ml.common.dataset.MLInputDataset;
 import org.opensearch.ml.common.dataset.QuestionAnsweringInputDataSet;
+import org.opensearch.ml.common.dataset.ScrollSearchQueryInputDataset;
 import org.opensearch.ml.common.dataset.SearchQueryInputDataset;
 import org.opensearch.ml.common.dataset.TextDocsInputDataSet;
 import org.opensearch.ml.common.dataset.TextSimilarityInputDataSet;
 import org.opensearch.ml.common.dataset.remote.RemoteInferenceInputDataSet;
 import org.opensearch.ml.common.input.parameter.MLAlgoParams;
+import org.opensearch.ml.common.input.parameter.clustering.KMeansParams;
 import org.opensearch.ml.common.output.model.ModelResultFilter;
 import org.opensearch.search.builder.SearchSourceBuilder;
 
@@ -102,7 +104,12 @@ public class MLInput implements Input {
         this.parameters = parameters;
         if (inputDataset != null) {
             this.inputDataset = inputDataset;
-        } else {
+        } else if (isKMeansPaginated(algorithm, parameters)) {
+            Map<String, String> kmeansParams = ((KMeansParams) parameters).getExtension();
+            String scrollTime = kmeansParams == null ? null : kmeansParams.get("scroll_time");
+            this.inputDataset = new ScrollSearchQueryInputDataset(sourceIndices, searchSourceBuilder, scrollTime);
+        }
+        else {
             this.inputDataset = createInputDataSet(searchSourceBuilder, sourceIndices, dataFrame);
         }
     }
@@ -321,8 +328,23 @@ public class MLInput implements Input {
             inputDataSet = new TextSimilarityInputDataSet(queryText, textDocs);
         } else if (algorithm == FunctionName.QUESTION_ANSWERING) {
             inputDataSet = new QuestionAnsweringInputDataSet(question, context);
+        } else if (isKMeansPaginated(algorithm, mlParameters)) {
+
         }
         return new MLInput(algorithm, mlParameters, searchSourceBuilder, sourceIndices, dataFrame, inputDataSet);
+    }
+
+    private static boolean isKMeansPaginated(FunctionName algo, MLAlgoParams mlParams) {
+        if (algo != FunctionName.KMEANS || mlParams == null) {
+            return false;
+        }
+        KMeansParams params = (KMeansParams) mlParams;
+        Map<String, String> extension = params.getExtension();
+        if (extension == null || !extension.containsKey("paginate_search_type")) {
+            return false;
+        }
+
+        return true;
     }
 
     private MLInputDataset createInputDataSet(SearchSourceBuilder searchSourceBuilder, List<String> sourceIndices, DataFrame dataFrame) {

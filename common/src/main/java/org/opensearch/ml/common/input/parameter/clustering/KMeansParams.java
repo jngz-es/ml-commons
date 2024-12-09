@@ -6,8 +6,10 @@
 package org.opensearch.ml.common.input.parameter.clustering;
 
 import static org.opensearch.core.xcontent.XContentParserUtils.ensureExpectedToken;
+import static org.opensearch.ml.common.utils.StringUtils.getParameterMap;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.opensearch.core.ParseField;
 import org.opensearch.core.common.io.stream.StreamInput;
@@ -37,6 +39,7 @@ public class KMeansParams implements MLAlgoParams {
     public static final String CENTROIDS_FIELD = "centroids";
     public static final String ITERATIONS_FIELD = "iterations";
     public static final String DISTANCE_TYPE_FIELD = "distance_type";
+    public static final String EXTENSION = "extension";
 
     // The number of centroids to use.
     private Integer centroids;
@@ -46,11 +49,14 @@ public class KMeansParams implements MLAlgoParams {
     private DistanceType distanceType;
     // TODO: expose number of thread and seed?
 
+    private Map<String, String> extension;
+
     @Builder(toBuilder = true)
-    public KMeansParams(Integer centroids, Integer iterations, DistanceType distanceType) {
+    public KMeansParams(Integer centroids, Integer iterations, DistanceType distanceType, Map<String, String> extension) {
         this.centroids = centroids;
         this.iterations = iterations;
         this.distanceType = distanceType;
+        this.extension = extension;
     }
 
     public KMeansParams(StreamInput in) throws IOException {
@@ -59,12 +65,16 @@ public class KMeansParams implements MLAlgoParams {
         if (in.readBoolean()) {
             this.distanceType = in.readEnum(DistanceType.class);
         }
+        if (in.readBoolean()) {
+            extension = in.readMap(StreamInput::readString, StreamInput::readOptionalString);
+        }
     }
 
     public static MLAlgoParams parse(XContentParser parser) throws IOException {
         Integer k = null;
         Integer iterations = null;
         DistanceType distanceType = null;
+        Map<String, String> extension = null;
 
         ensureExpectedToken(XContentParser.Token.START_OBJECT, parser.currentToken(), parser);
         while (parser.nextToken() != XContentParser.Token.END_OBJECT) {
@@ -81,12 +91,15 @@ public class KMeansParams implements MLAlgoParams {
                 case DISTANCE_TYPE_FIELD:
                     distanceType = DistanceType.from(parser.text());
                     break;
+                case EXTENSION:
+                    extension = getParameterMap(parser.map());
+                    break;
                 default:
                     parser.skipChildren();
                     break;
             }
         }
-        return new KMeansParams(k, iterations, distanceType);
+        return new KMeansParams(k, iterations, distanceType, extension);
     }
 
     @Override
@@ -104,6 +117,12 @@ public class KMeansParams implements MLAlgoParams {
         } else {
             out.writeBoolean(false);
         }
+        if (extension != null && !extension.isEmpty()) {
+            out.writeBoolean(true);
+            out.writeMap(extension, StreamOutput::writeString, StreamOutput::writeOptionalString);
+        } else {
+            out.writeBoolean(false);
+        }
     }
 
     @Override
@@ -117,6 +136,9 @@ public class KMeansParams implements MLAlgoParams {
         }
         if (distanceType != null) {
             builder.field(DISTANCE_TYPE_FIELD, distanceType.name());
+        }
+        if (extension != null && !extension.isEmpty()) {
+            builder.field(EXTENSION, extension);
         }
         builder.endObject();
         return builder;

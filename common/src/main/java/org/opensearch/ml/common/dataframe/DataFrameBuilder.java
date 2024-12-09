@@ -6,9 +6,11 @@
 package org.opensearch.ml.common.dataframe;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.opensearch.core.common.io.stream.StreamInput;
@@ -51,6 +53,90 @@ public class DataFrameBuilder {
         }
 
         return load(columnMetas, input);
+    }
+
+    public DataFrame loadFlat1(final List<Map<String, Object>> input) {
+        if (input == null || input.isEmpty()) {
+            throw new IllegalArgumentException("input is null or empty");
+        }
+
+//        List<Map<String, Float>> flatInput = input.stream()
+//                .flatMap(map -> map.entrySet().stream()
+//                        .flatMap(entry -> {
+//                            AtomicInteger counter = new AtomicInteger(0);
+//                            return ((List<Float>)entry.getValue()).stream()
+//                                    .map(value -> new AbstractMap.SimpleEntry<>(
+//                                            entry.getKey() + "_" + counter.getAndIncrement(),
+//                                            value
+//                                    ));
+//                        })
+//                )
+//                .collect(Collectors.groupingBy(
+//                        entry -> entry.getKey().substring(0, entry.getKey().lastIndexOf('_')),
+//                        LinkedHashMap::new,
+//                        Collectors.toMap(
+//                                Map.Entry::getKey,
+//                                Map.Entry::getValue,
+//                                (v1, v2) -> v1,
+//                                LinkedHashMap::new
+//                        )
+//                ))
+//                .values()
+//                .stream()
+//                .collect(Collectors.toList());
+
+        List<Map<String, Object>> flatInput = new ArrayList<>();
+        input.forEach(stringObjectMap -> {
+            Map<String, Object> innerMap = new HashMap<>();
+            for (Map.Entry entry : stringObjectMap.entrySet()) {
+                String key = (String) entry.getKey();
+                if (entry.getValue() instanceof List<?>) {
+                    List<Object> v = (List<Object>) entry.getValue();
+                    for (int i=0; i<v.size(); i++) {
+                        innerMap.put(key+i, v.get(i));
+                    }
+                } else {
+                    innerMap.put(key, entry.getValue());
+                }
+            }
+            flatInput.add(innerMap);
+        });
+
+        return load(flatInput);
+    }
+
+    public DataFrame loadFlat(final List<Map<String, Object>> input) {
+        if (input == null || input.isEmpty()) {
+            throw new IllegalArgumentException("input is null or empty");
+        }
+
+        List<Map<String, Object>> flatInput = new ArrayList<>();
+        input.forEach(stringObjectMap -> {
+            Map<String, Object> innerMap = new HashMap<>();
+            for (Map.Entry entry : stringObjectMap.entrySet()) {
+                List<Object> flatList = new ArrayList<>();
+                String key = (String) entry.getKey();
+                AtomicInteger suffixNumber = new AtomicInteger(0);
+                flatNestedListDFS(entry.getValue(), flatList);
+                flatList.forEach(v -> {
+                    innerMap.put(key + "_" + suffixNumber.getAndIncrement(), v);
+                });
+            }
+            flatInput.add(innerMap);
+        });
+
+        return load(flatInput);
+    }
+
+    private void flatNestedListDFS(Object input, List<Object> output) {
+        if (input == null) {
+            return;
+        }
+        if (input instanceof List<?>) {
+            ((List<?>) input).forEach(o -> {flatNestedListDFS(o, output);});
+        } else {
+            output.add(input);
+        }
     }
 
     /**
