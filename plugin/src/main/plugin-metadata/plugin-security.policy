@@ -46,4 +46,6 @@ grant {
     permission java.net.URLPermission "https://*:*/*", "*:*";
     permission java.net.URLPermission "http://*:*/messages/*", "*:*";
     permission java.net.URLPermission "https://*:*/messages/*", "*:*";
+    
+    permission java.net.NetPermission "getProxySelector";
 };
