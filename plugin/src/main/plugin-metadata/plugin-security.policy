@@ -33,4 +33,6 @@ grant {
 
     // AWS credentials needed for clients
     permission java.io.FilePermission "${user.home}/.aws/-", "read";
+
+    permission java.net.NetPermission "getProxySelector";
 };
