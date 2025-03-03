@@ -171,13 +171,20 @@ public class AwsConnectorExecutor extends AbstractConnectorExecutor {
         try {
             RemoteModelStreamProducer streamProducer = new RemoteModelStreamProducer();
             StreamTicket streamTicket = streamManager.get().registerStream(streamProducer, null);
+            getLogger().info("[jngz] stream ticket: {}", streamTicket);
             List<ModelTensor> modelTensors = new ArrayList<>();
             modelTensors.add(ModelTensor.builder().name("response").dataAsMap(Map.of("stream_ticket", streamTicket)).build());
             actionListener.onResponse(new Tuple<>(0, new ModelTensors(modelTensors)));
             EventSourceListener listener = new AwsEventSourceListener(getLogger(), true, streamProducer);
             Request request = ConnectorUtils.buildOKHttpRequestPOST(action, connector, parameters, payload);
-            getLogger().info("Stream request created: " + request);
-            EventSources.createFactory(okHttpClient).newEventSource(request, listener);
+            getLogger().info("[jngz] Stream request: {}", request);
+            getLogger().info("[jngz] Stream request body: {}", request.body());
+            AccessController.doPrivileged((PrivilegedExceptionAction<Void>) () -> {
+                EventSources.createFactory(okHttpClient).newEventSource(request, listener);
+                return null;
+            });
+        } catch (PrivilegedActionException e) {
+            throw new RuntimeException("Failed to build event source.", e);
         } catch (RuntimeException exception) {
             log.error("[stream]Failed to execute {} in aws connector: {}", action, exception.getMessage(), exception);
             actionListener.onFailure(exception);
@@ -217,7 +224,7 @@ public class AwsConnectorExecutor extends AbstractConnectorExecutor {
          */
         @Override
         public void onOpen(EventSource eventSource, Response response) {
-            logger.info("Connected to SSE Endpoint.");
+            logger.info("[jngz] Connected to SSE Endpoint.");
         }
 
         /***
@@ -272,7 +279,7 @@ public class AwsConnectorExecutor extends AbstractConnectorExecutor {
                     // TODO: reconnect
                 } else {
                     streamProducer.setProduceError(true);
-                    throw new MLException("SSE failure.", t);
+                    throw new MLException("SSE failure 2.", t);
                 }
             }
         }
