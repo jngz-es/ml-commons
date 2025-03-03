@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import lombok.Data;
 import org.opensearch.action.ActionRequest;
 import org.opensearch.arrow.spi.StreamManager;
 import org.opensearch.cluster.metadata.IndexNameExpressionResolver;
@@ -377,11 +378,11 @@ public class MachineLearningPlugin extends Plugin
 
     private MLModelChunkUploader mlModelChunkUploader;
     private MLEngine mlEngine;
+    private StreamManagerWrapper streamManagerWrapper;
 
     private Client client;
     private ClusterService clusterService;
     private ThreadPool threadPool;
-    private Set<String> indicesToListen;
 
     public static final String ML_ROLE_NAME = "ml";
     private NamedXContentRegistry xContentRegistry;
@@ -536,6 +537,7 @@ public class MachineLearningPlugin extends Plugin
         encryptor = new EncryptorImpl(clusterService, client, sdkClient, mlIndicesHandler);
 
         mlEngine = new MLEngine(dataPath, encryptor, streamManagerSupplier);
+        streamManagerWrapper = new StreamManagerWrapper();
         nodeHelper = new DiscoveryNodeHelper(clusterService, settings);
         modelCacheHelper = new MLModelCacheHelper(clusterService, settings);
         cmHandler = new OpenSearchConversationalMemoryHandler(client, clusterService);
@@ -790,7 +792,7 @@ public class MachineLearningPlugin extends Plugin
         RestMLPredictionStreamingAction restMLPredictionStreamingAction = new RestMLPredictionStreamingAction(
             mlModelManager,
             mlFeatureEnabledSetting,
-            streamManagerSupplier
+            streamManagerWrapper
         );
         RestMLExecuteAction restMLExecuteAction = new RestMLExecuteAction(mlFeatureEnabledSetting);
         RestMLGetModelAction restMLGetModelAction = new RestMLGetModelAction(mlFeatureEnabledSetting);
@@ -1207,6 +1209,13 @@ public class MachineLearningPlugin extends Plugin
     @Override
     public void onStreamManagerInitialized(Supplier<StreamManager> streamManager) {
         this.streamManager = streamManager.get();
+        mlEngine.setStreamManager(streamManager);
+        streamManagerWrapper.setStreamManager(streamManager);
+    }
+
+    @Data
+    public static class StreamManagerWrapper {
+        private Supplier<StreamManager> streamManager;
     }
 
 }
