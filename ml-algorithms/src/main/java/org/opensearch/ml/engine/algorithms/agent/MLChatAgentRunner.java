@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.opensearch.action.ActionRequest;
 import org.opensearch.action.StepListener;
@@ -127,6 +128,11 @@ public class MLChatAgentRunner implements MLAgentRunner {
         String title = params.get(MLAgentExecutor.QUESTION);
         int messageHistoryLimit = getMessageHistoryLimit(params);
 
+        if (StringUtils.isEmpty(memoryType)) {
+            runAgent(mlAgent, params, listener, null, null);
+            return;
+        }
+
         ConversationIndexMemory.Factory conversationIndexMemoryFactory = (ConversationIndexMemory.Factory) memoryFactoryMap.get(memoryType);
         conversationIndexMemoryFactory.create(title, memoryId, appType, ActionListener.<ConversationIndexMemory>wrap(memory -> {
             // TODO: call runAgent directly if messageHistoryLimit == 0
@@ -151,8 +157,8 @@ public class MLChatAgentRunner implements MLAgentRunner {
                         );
                 }
 
-                StringBuilder chatHistoryBuilder = new StringBuilder();
                 if (!messageList.isEmpty()) {
+                    StringBuilder chatHistoryBuilder = new StringBuilder();
                     String chatHistoryPrefix = params.getOrDefault(PROMPT_CHAT_HISTORY_PREFIX, CHAT_HISTORY_PREFIX);
                     chatHistoryBuilder.append(chatHistoryPrefix);
                     for (Message message : messageList) {
@@ -220,7 +226,9 @@ public class MLChatAgentRunner implements MLAgentRunner {
         AtomicReference<String> newPrompt = new AtomicReference<>(tmpSubstitutor.replace(prompt));
         tmpParameters.put(PROMPT, newPrompt.get());
 
-        List<ModelTensors> traceTensors = createModelTensors(sessionId, parentInteractionId);
+        List<ModelTensors> traceTensors = (conversationIndexMemory == null)
+            ? new ArrayList<>()
+            : createModelTensors(sessionId, parentInteractionId);
         int maxIterations = Integer.parseInt(tmpParameters.getOrDefault(MAX_ITERATION, "3")) * 2;
         for (int i = 0; i < maxIterations; i++) {
             int finalI = i;
@@ -401,8 +409,8 @@ public class MLChatAgentRunner implements MLAgentRunner {
         client.execute(MLPredictionTaskAction.INSTANCE, request, firstListener);
     }
 
-    private static List<ModelTensors> createFinalAnswerTensors(List<ModelTensors> sessionId, List<ModelTensor> lastThought) {
-        List<ModelTensors> finalModelTensors = sessionId;
+    private static List<ModelTensors> createFinalAnswerTensors(List<ModelTensors> modelTensorsList, List<ModelTensor> lastThought) {
+        List<ModelTensors> finalModelTensors = modelTensorsList;
         finalModelTensors.add(ModelTensors.builder().mlModelTensors(lastThought).build());
         return finalModelTensors;
     }
@@ -572,19 +580,21 @@ public class MLChatAgentRunner implements MLAgentRunner {
     private static List<ModelTensors> createModelTensors(String sessionId, String parentInteractionId) {
         List<ModelTensors> cotModelTensors = new ArrayList<>();
 
-        cotModelTensors
-            .add(
-                ModelTensors
-                    .builder()
-                    .mlModelTensors(
-                        List
-                            .of(
-                                ModelTensor.builder().name(MLAgentExecutor.MEMORY_ID).result(sessionId).build(),
-                                ModelTensor.builder().name(MLAgentExecutor.PARENT_INTERACTION_ID).result(parentInteractionId).build()
-                            )
-                    )
-                    .build()
-            );
+        if (!StringUtils.isEmpty(sessionId)) {
+            cotModelTensors
+                .add(
+                    ModelTensors
+                        .builder()
+                        .mlModelTensors(
+                            List
+                                .of(
+                                    ModelTensor.builder().name(MLAgentExecutor.MEMORY_ID).result(sessionId).build(),
+                                    ModelTensor.builder().name(MLAgentExecutor.PARENT_INTERACTION_ID).result(parentInteractionId).build()
+                                )
+                        )
+                        .build()
+                );
+        }
         return cotModelTensors;
     }
 
