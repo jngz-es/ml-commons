@@ -81,7 +81,7 @@ public class AwsConnectorExecutor extends AbstractConnectorExecutor {
 
     @Setter
     @Getter
-    private Supplier<StreamManager> streamManager;
+    private StreamManager streamManager;
     private OkHttpClient okHttpClient;
 
     public AwsConnectorExecutor(Connector connector) {
@@ -170,7 +170,7 @@ public class AwsConnectorExecutor extends AbstractConnectorExecutor {
     ) {
         try {
             RemoteModelStreamProducer streamProducer = new RemoteModelStreamProducer();
-            StreamTicket streamTicket = streamManager.get().registerStream(streamProducer, null);
+            StreamTicket streamTicket = streamManager.registerStream(streamProducer, null);
             getLogger().info("[jngz] stream ticket: {}", streamTicket);
             List<ModelTensor> modelTensors = new ArrayList<>();
             modelTensors.add(ModelTensor.builder().name("response").dataAsMap(Map.of("stream_ticket", streamTicket)).build());

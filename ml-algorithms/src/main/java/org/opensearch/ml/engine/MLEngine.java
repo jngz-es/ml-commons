@@ -51,14 +51,13 @@ public class MLEngine {
 
     private Encryptor encryptor;
 
-    private Supplier<StreamManager> streamManager;
+    private StreamManager streamManager;
 
-    public MLEngine(Path opensearchDataFolder, Encryptor encryptor, Supplier<StreamManager> streamManager) {
+    public MLEngine(Path opensearchDataFolder, Encryptor encryptor) {
         this.mlCachePath = opensearchDataFolder.resolve("ml_cache");
         this.mlModelsCachePath = mlCachePath.resolve("models_cache");
         this.mlConfigPath = mlCachePath.resolve("config");
         this.encryptor = encryptor;
-        this.streamManager = streamManager;
     }
 
     public String getPrebuiltModelMetaListPath() {
@@ -225,7 +224,7 @@ public class MLEngine {
         return encryptor.encrypt(credential, tenantId);
     }
 
-    public void setStreamManager(Supplier<StreamManager> streamManager) {
+    public void setStreamManager(StreamManager streamManager) {
         this.streamManager = streamManager;
     }
 

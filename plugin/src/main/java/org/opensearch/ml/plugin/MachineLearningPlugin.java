@@ -236,58 +236,7 @@ import org.opensearch.ml.processor.MLInferenceIngestProcessor;
 import org.opensearch.ml.processor.MLInferenceSearchRequestProcessor;
 import org.opensearch.ml.processor.MLInferenceSearchResponseProcessor;
 import org.opensearch.ml.repackage.com.google.common.collect.ImmutableList;
-import org.opensearch.ml.rest.RestMLCancelBatchJobAction;
-import org.opensearch.ml.rest.RestMLCreateConnectorAction;
-import org.opensearch.ml.rest.RestMLCreateControllerAction;
-import org.opensearch.ml.rest.RestMLDeleteAgentAction;
-import org.opensearch.ml.rest.RestMLDeleteConnectorAction;
-import org.opensearch.ml.rest.RestMLDeleteControllerAction;
-import org.opensearch.ml.rest.RestMLDeleteModelAction;
-import org.opensearch.ml.rest.RestMLDeleteModelGroupAction;
-import org.opensearch.ml.rest.RestMLDeleteTaskAction;
-import org.opensearch.ml.rest.RestMLDeployModelAction;
-import org.opensearch.ml.rest.RestMLExecuteAction;
-import org.opensearch.ml.rest.RestMLGetAgentAction;
-import org.opensearch.ml.rest.RestMLGetConfigAction;
-import org.opensearch.ml.rest.RestMLGetConnectorAction;
-import org.opensearch.ml.rest.RestMLGetControllerAction;
-import org.opensearch.ml.rest.RestMLGetModelAction;
-import org.opensearch.ml.rest.RestMLGetModelGroupAction;
-import org.opensearch.ml.rest.RestMLGetTaskAction;
-import org.opensearch.ml.rest.RestMLGetToolAction;
-import org.opensearch.ml.rest.RestMLListToolsAction;
-import org.opensearch.ml.rest.RestMLPredictionAction;
-import org.opensearch.ml.rest.RestMLProfileAction;
-import org.opensearch.ml.rest.RestMLRegisterAgentAction;
-import org.opensearch.ml.rest.RestMLRegisterModelAction;
-import org.opensearch.ml.rest.RestMLRegisterModelGroupAction;
-import org.opensearch.ml.rest.RestMLRegisterModelMetaAction;
-import org.opensearch.ml.rest.RestMLSearchAgentAction;
-import org.opensearch.ml.rest.RestMLSearchConnectorAction;
-import org.opensearch.ml.rest.RestMLSearchModelAction;
-import org.opensearch.ml.rest.RestMLSearchModelGroupAction;
-import org.opensearch.ml.rest.RestMLSearchTaskAction;
-import org.opensearch.ml.rest.RestMLStatsAction;
-import org.opensearch.ml.rest.RestMLTrainAndPredictAction;
-import org.opensearch.ml.rest.RestMLTrainingAction;
-import org.opensearch.ml.rest.RestMLUndeployModelAction;
-import org.opensearch.ml.rest.RestMLUpdateConnectorAction;
-import org.opensearch.ml.rest.RestMLUpdateControllerAction;
-import org.opensearch.ml.rest.RestMLUpdateModelAction;
-import org.opensearch.ml.rest.RestMLUpdateModelGroupAction;
-import org.opensearch.ml.rest.RestMLUploadModelChunkAction;
-import org.opensearch.ml.rest.RestMemoryCreateConversationAction;
-import org.opensearch.ml.rest.RestMemoryCreateInteractionAction;
-import org.opensearch.ml.rest.RestMemoryDeleteConversationAction;
-import org.opensearch.ml.rest.RestMemoryGetConversationAction;
-import org.opensearch.ml.rest.RestMemoryGetConversationsAction;
-import org.opensearch.ml.rest.RestMemoryGetInteractionAction;
-import org.opensearch.ml.rest.RestMemoryGetInteractionsAction;
-import org.opensearch.ml.rest.RestMemoryGetTracesAction;
-import org.opensearch.ml.rest.RestMemorySearchConversationsAction;
-import org.opensearch.ml.rest.RestMemorySearchInteractionsAction;
-import org.opensearch.ml.rest.RestMemoryUpdateConversationAction;
-import org.opensearch.ml.rest.RestMemoryUpdateInteractionAction;
+import org.opensearch.ml.rest.*;
 import org.opensearch.ml.searchext.MLInferenceRequestParametersExtBuilder;
 import org.opensearch.ml.settings.MLCommonsSettings;
 import org.opensearch.ml.settings.MLFeatureEnabledSetting;
@@ -404,12 +353,6 @@ public class MachineLearningPlugin extends Plugin
     private Encryptor encryptor;
 
     private StreamManager streamManager;
-
-    private StreamManager getStreamManagerRef() {
-        return this.streamManager;
-    }
-
-    private Supplier<StreamManager> streamManagerSupplier = () -> { return getStreamManagerRef();};
 
     public MachineLearningPlugin(Settings settings) {
         // Handle this here as this feature is tied to Search/Query API, not to a ml-common API
@@ -536,7 +479,7 @@ public class MachineLearningPlugin extends Plugin
 
         encryptor = new EncryptorImpl(clusterService, client, sdkClient, mlIndicesHandler);
 
-        mlEngine = new MLEngine(dataPath, encryptor, streamManagerSupplier);
+        mlEngine = new MLEngine(dataPath, encryptor);
         streamManagerWrapper = new StreamManagerWrapper();
         nodeHelper = new DiscoveryNodeHelper(clusterService, settings);
         modelCacheHelper = new MLModelCacheHelper(clusterService, settings);
@@ -770,8 +713,7 @@ public class MachineLearningPlugin extends Plugin
                 mlCircuitBreakerService,
                 mlModelAutoRedeployer,
                 cmHandler,
-                sdkClient,
-                streamManagerSupplier
+                sdkClient
             );
     }
 
@@ -1207,15 +1149,15 @@ public class MachineLearningPlugin extends Plugin
     }
 
     @Override
-    public void onStreamManagerInitialized(Supplier<StreamManager> streamManager) {
-        this.streamManager = streamManager.get();
+    public void onStreamManagerInitialized(StreamManager streamManager) {
+        this.streamManager = streamManager;
         mlEngine.setStreamManager(streamManager);
         streamManagerWrapper.setStreamManager(streamManager);
     }
 
     @Data
     public static class StreamManagerWrapper {
-        private Supplier<StreamManager> streamManager;
+        private StreamManager streamManager;
     }
 
 }

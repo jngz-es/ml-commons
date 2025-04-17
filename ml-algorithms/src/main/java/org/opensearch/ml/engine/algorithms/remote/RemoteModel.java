@@ -100,7 +100,7 @@ public class RemoteModel implements Predictable {
     }
 
     @Override
-    public void initModel(MLModel model, Map<String, Object> params, Encryptor encryptor, Supplier<StreamManager> streamManager) {
+    public void initModel(MLModel model, Map<String, Object> params, Encryptor encryptor, StreamManager streamManager) {
         try {
             Connector connector = model.getConnector().cloneConnector();
             connector
