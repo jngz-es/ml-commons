@@ -140,9 +140,9 @@ public class RestMLPredictionStreamingAction extends BaseRestHandler {
                                             ModelTensorOutput modelTensorOutput = (ModelTensorOutput) mlTaskResponse.getOutput();
                                             StreamTicket ticket = (StreamTicket) modelTensorOutput.getMlModelOutputs().get(0).getMlModelTensors().get(0).getDataAsMap().get("stream_ticket");
                                             log.info("[jngz rest] stream ticket is: {}", ticket);
-                                            StreamManager streamManager = streamManagerWrapper.getStreamManager().get();
+                                            StreamManager streamManager = streamManagerWrapper.getStreamManager();
                                             StreamReader<VectorSchemaRoot> reader1 = streamManager.getStreamReader(ticket);
-                                            try (StreamReader<VectorSchemaRoot> reader = streamManagerWrapper.getStreamManager().get().getStreamReader(ticket)) {
+                                            try (StreamReader<VectorSchemaRoot> reader = streamManagerWrapper.getStreamManager().getStreamReader(ticket)) {
                                                 int totalBatches = 0;
                                                 VectorSchemaRoot vectorSchemaRoot = reader.getRoot();
                                                 VarCharVector eventVector1 = (VarCharVector) vectorSchemaRoot.getVector("event");

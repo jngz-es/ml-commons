@@ -351,9 +351,9 @@ public interface RemoteConnectorExecutor {
         ActionListener<Tuple<Integer, ModelTensors>> actionListener
     );
 
-    default void setStreamManager(Supplier<StreamManager> streamManager) {}
+    default void setStreamManager(StreamManager streamManager) {}
 
-    default Supplier<StreamManager> getStreamManager() {
+    default StreamManager getStreamManager() {
         return null;
     };
 

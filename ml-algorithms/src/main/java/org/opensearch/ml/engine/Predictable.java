@@ -53,7 +53,7 @@ public interface Predictable {
 
     };
 
-    default void initModel(MLModel model, Map<String, Object> params, Encryptor encryptor, Supplier<StreamManager> streamManager) {
+    default void initModel(MLModel model, Map<String, Object> params, Encryptor encryptor, StreamManager streamManager) {
 
     };
 
