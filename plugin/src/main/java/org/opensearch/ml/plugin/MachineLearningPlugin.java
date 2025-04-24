@@ -1152,6 +1152,7 @@ public class MachineLearningPlugin extends Plugin
     public void onStreamManagerInitialized(StreamManager streamManager) {
         this.streamManager = streamManager;
         mlEngine.setStreamManager(streamManager);
+        mlEngine.setThreadPool(threadPool);
         streamManagerWrapper.setStreamManager(streamManager);
     }
 
