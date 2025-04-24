@@ -357,4 +357,10 @@ public interface RemoteConnectorExecutor {
         return null;
     };
 
+    default void setThreadPool(ThreadPool threadPool) {}
+
+    default ThreadPool getThreadPool() {
+        return null;
+    };
+
 }
