@@ -11,9 +11,7 @@ import static org.opensearch.ml.common.connector.HttpConnector.REGION_FIELD;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.Supplier;
 
-import lombok.Setter;
 import org.opensearch.arrow.spi.StreamManager;
 import org.opensearch.core.action.ActionListener;
 import org.opensearch.ml.common.FunctionName;
@@ -29,10 +27,11 @@ import org.opensearch.ml.common.model.MLModelFormat;
 import org.opensearch.ml.common.output.MLOutput;
 import org.opensearch.ml.common.output.Output;
 import org.opensearch.ml.engine.encryptor.Encryptor;
+import org.opensearch.threadpool.ThreadPool;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.opensearch.threadpool.ThreadPool;
 
 /**
  * This is the interface to all ml algorithms.
